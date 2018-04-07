@@ -974,9 +974,9 @@ void processCommand(const std::string &message)
 //plays intro, ends when intro is over or button has been pressed (handles events)
 void playIntro()
 {
-	if(CCS->videoh->openAndPlayVideo("3DOLOGO.SMK", 0, 1, screen, true, true))
+	if(CCS->videoh->openAndPlayVideo("3DOLOGO.SMK", 0, 1, true, true))
 	{
-		CCS->videoh->openAndPlayVideo("AZVS.SMK", 0, 1, screen, true, true);
+		CCS->videoh->openAndPlayVideo("AZVS.SMK", 0, 1, true, true);
 	}
 }
 
