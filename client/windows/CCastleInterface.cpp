@@ -47,7 +47,6 @@ CBuildingRect::CBuildingRect(CCastleBuildings * Par, const CGTownInstance * Town
 	str(Str),
 	stateCounter(80)
 {
-	recActions = ACTIVATE | DEACTIVATE | DISPOSE | SHARE_POS;
 	addUsedEvents(LCLICK | RCLICK | HOVER);
 	pos.x += str->pos.x;
 	pos.y += str->pos.y;
@@ -522,17 +521,26 @@ void HeroSlots::swapArmies()
 }
 
 
-template <class T>
 class SORTHELP
 {
 public:
-	bool operator() (const std::shared_ptr<T> a, const std::shared_ptr<T> b)
+	bool operator() (const CIntObject * a, const CIntObject * b)
 	{
-		return (*a)<(*b);
+		auto b1 = dynamic_cast<const CBuildingRect *>(a);
+		auto b2 = dynamic_cast<const CBuildingRect *>(b);
+
+		if(!b1 && !b2)
+			return intptr_t(a) < intptr_t(b);
+		if(b1 && !b2)
+			return false;
+		if(!b1 && b2)
+			return true;
+
+		return (*b1)<(*b2);
 	}
 };
 
-SORTHELP<CBuildingRect> buildSorter;
+SORTHELP buildSorter;
 
 CCastleBuildings::CCastleBuildings(const CGTownInstance* Town):
 	town(Town),
@@ -552,8 +560,7 @@ CCastleBuildings::~CCastleBuildings() = default;
 void CCastleBuildings::recreate()
 {
 	selectedBuilding = nullptr;
-	//TODO: remove show[all] method and try UPDATE+SHOWALL
-	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(ACTIVATE+SHARE_POS);
+	OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255-DISPOSE);
 
 	buildings.clear();
 	groups.clear();
@@ -600,7 +607,8 @@ void CCastleBuildings::recreate()
 
 		buildings.push_back(std::make_shared<CBuildingRect>(this, town, toAdd));
 	}
-	boost::sort(buildings, buildSorter);
+
+	boost::sort(children, buildSorter); //TODO: create building in blit order
 }
 
 void CCastleBuildings::addBuilding(BuildingID building)
@@ -630,20 +638,6 @@ void CCastleBuildings::removeBuilding(BuildingID building)
 {
 	//FIXME: implement faster method without complete recreation of town
 	recreate();
-}
-
-void CCastleBuildings::show(SDL_Surface * to)
-{
-	CIntObject::show(to);
-	for(auto str : buildings)
-		str->show(to);
-}
-
-void CCastleBuildings::showAll(SDL_Surface * to)
-{
-	CIntObject::showAll(to);
-	for(auto str : buildings)
-		str->showAll(to);
 }
 
 const CGHeroInstance * CCastleBuildings::getHero()
