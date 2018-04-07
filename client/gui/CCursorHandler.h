@@ -41,6 +41,7 @@ class CCursorHandler final
 	void clearBuffer();
 	void updateBuffer(CIntObject * payload);
 	void replaceBuffer(CIntObject * payload);
+	void shiftPos( int &x, int &y );
 
 public:
 	/// position of cursor
@@ -66,7 +67,6 @@ public:
 
 	void render();
 
-	void shiftPos( int &x, int &y );
 	void hide() { showing=false; };
 	void show() { showing=true; };
 

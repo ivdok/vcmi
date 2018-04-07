@@ -421,7 +421,7 @@ void CHeroGSlot::clickLeft(tribool down, bool previousState)
 		{
 			setHighlight(true);
 			owner->garr->selectSlot(nullptr);
-			showAll(screen2);
+			redraw();
 		}
 
 		//refresh statusbar

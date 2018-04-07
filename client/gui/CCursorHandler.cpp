@@ -21,7 +21,7 @@
 void CCursorHandler::clearBuffer()
 {
 	Uint32 fillColor = SDL_MapRGBA(buffer->format, 0, 0, 0, 0);
-    CSDL_Ext::fillRect(buffer, nullptr, fillColor);
+	CSDL_Ext::fillRect(buffer, nullptr, fillColor);
 }
 
 void CCursorHandler::updateBuffer(CIntObject * payload)

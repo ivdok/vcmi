@@ -1110,7 +1110,7 @@ void CTransformerWindow::CItem::clickLeft(tribool down, bool previousState)
 	if(previousState && (!down))
 	{
 		move();
-		parent->showAll(screen2);
+		parent->redraw();
 	}
 }
 
@@ -1152,7 +1152,7 @@ void CTransformerWindow::addAll()
 		if(elem->left)
 			elem->move();
 	}
-	showAll(screen2);
+	redraw();
 }
 
 void CTransformerWindow::updateGarrisons()
