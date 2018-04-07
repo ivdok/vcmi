@@ -118,32 +118,13 @@ static void mainLoop();
 
 void init()
 {
-	CStopWatch tmh, pomtime;
+	CStopWatch tmh;
 
 	loadDLLClasses();
 	const_cast<CGameInfo*>(CGI)->setFromLib();
 
 	logGlobal->info("Initializing VCMI_Lib: %d ms", tmh.getDiff());
 
-
-	if(!settings["session"]["headless"].Bool())
-	{
-		pomtime.getDiff();
-		CCS->curh = new CCursorHandler();
-		graphics = new Graphics(); // should be before curh->init()
-
-		CCS->curh->initCursor();
-		CCS->curh->show();
-		logGlobal->info("Screen handler: %d ms", pomtime.getDiff());
-		pomtime.getDiff();
-
-		graphics->load();
-		logGlobal->info("\tMain graphics: %d ms", pomtime.getDiff());
-		logGlobal->info("Initializing game graphics: %d ms", tmh.getDiff());
-
-		CMessage::init();
-		logGlobal->info("Message handler: %d ms", tmh.getDiff());
-	}
 }
 
 static void prog_version()
@@ -466,8 +447,10 @@ int main(int argc, char * argv[])
 			playIntro();
 		SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
 		SDL_RenderClear(mainRenderer);
+		SDL_RenderPresent(mainRenderer);
 	}
-	SDL_RenderPresent(mainRenderer);
+
+
 #ifndef VCMI_NO_THREADED_LOAD
 	#ifdef VCMI_ANDROID // android loads the data quite slowly so we display native progressbar to prevent having only black screen for few seconds
 	{
@@ -480,6 +463,27 @@ int main(int argc, char * argv[])
 	}
 	#endif // ANDROID
 #endif // THREADED
+
+	if(!settings["session"]["headless"].Bool())
+	{
+		pomtime.getDiff();
+		CCS->curh = new CCursorHandler();
+		graphics = new Graphics(); // should be before curh->init()
+
+		CCS->curh->initCursor();
+		logGlobal->info("Screen handler: %d ms", pomtime.getDiff());
+		pomtime.getDiff();
+
+		graphics->load();//must be after Content loading but should be in main thread
+		logGlobal->info("Main graphics: %d ms", pomtime.getDiff());
+
+		CMessage::init();
+		logGlobal->info("Message handler: %d ms", pomtime.getDiff());
+
+		CCS->curh->show();
+	}
+
+
 	logGlobal->info("Initialization of VCMI (together): %d ms", total.getDiff());
 
 	session["autoSkip"].Bool()  = vm.count("autoSkip");

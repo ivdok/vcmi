@@ -11,6 +11,7 @@
 
 class CAnimImage;
 struct SDL_Surface;
+struct SDL_Texture;
 
 namespace ECursor
 {
@@ -26,6 +27,8 @@ namespace ECursor
 /// handles mouse cursor
 class CCursorHandler final
 {
+	SDL_Texture * cursorLayer;
+
 	SDL_Surface * help;
 	CAnimImage * currentCursor;
 
@@ -35,10 +38,6 @@ class CCursorHandler final
 
 	bool showing;
 
-	/// Draw cursor preserving original image below cursor
-	void drawWithScreenRestore();
-	/// Restore original image below cursor
-	void drawRestored();
 public:
 	/// position of cursor
 	int xpos, ypos;
@@ -64,8 +63,8 @@ public:
 	void render();
 
 	void shiftPos( int &x, int &y );
-	void hide() { showing=0; };
-	void show() { showing=1; };
+	void hide() { showing=false; };
+	void show() { showing=true; };
 
 	/// change cursor's positions to (x, y)
 	void cursorMove(const int & x, const int & y);

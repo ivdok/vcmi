@@ -20,6 +20,9 @@
 
 void CCursorHandler::initCursor()
 {
+	cursorLayer = SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 40, 40);
+	SDL_SetTextureBlendMode(cursorLayer, SDL_BLENDMODE_BLEND);
+
 	xpos = ypos = 0;
 	type = ECursor::DEFAULT;
 	dndObject = nullptr;
@@ -67,40 +70,6 @@ void CCursorHandler::cursorMove(const int & x, const int & y)
 {
 	xpos = x;
 	ypos = y;
-}
-
-void CCursorHandler::drawWithScreenRestore()
-{
-	if(!showing) return;
-	int x = xpos, y = ypos;
-	shiftPos(x, y);
-
-	SDL_Rect temp_rect1 = genRect(40,40,x,y);
-	SDL_Rect temp_rect2 = genRect(40,40,0,0);
-	SDL_BlitSurface(screen, &temp_rect1, help, &temp_rect2);
-
-	if (dndObject)
-	{
-		dndObject->moveTo(Point(x - dndObject->pos.w/2, y - dndObject->pos.h/2));
-		dndObject->showAll(screen);
-	}
-	else
-	{
-		currentCursor->moveTo(Point(x,y));
-		currentCursor->showAll(screen);
-	}
-}
-
-void CCursorHandler::drawRestored()
-{
-	if(!showing)
-		return;
-
-	int x = xpos, y = ypos;
-	shiftPos(x, y);
-
-	SDL_Rect temp_rect = genRect(40, 40, x, y);
-	SDL_BlitSurface(help, nullptr, screen, &temp_rect);
 }
 
 void CCursorHandler::shiftPos( int &x, int &y )
@@ -221,15 +190,55 @@ void CCursorHandler::centerCursor()
 
 void CCursorHandler::render()
 {
-	drawWithScreenRestore();
-	CSDL_Ext::update(screen);
-	drawRestored();
+	if(!showing)
+		return;
+
+	int x = xpos;
+	int y = ypos;
+	shiftPos(x, y);
+
+	Uint32 fillColor = SDL_MapRGBA(help->format, 0, 0, 0, 0);
+
+    CSDL_Ext::fillRect(help, nullptr, fillColor);
+
+	if(dndObject)
+	{
+		x -= dndObject->pos.w/2;
+		y -= dndObject->pos.h/2;
+
+		dndObject->moveTo(Point(0, 0));
+		dndObject->showAll(help);
+	}
+	else
+	{
+		currentCursor->moveTo(Point(0,0));
+		currentCursor->showAll(help);
+	}
+
+	SDL_UpdateTexture(cursorLayer, nullptr, help->pixels, help->pitch);
+
+	SDL_Rect destRect;
+	destRect.x = x;
+	destRect.y = y;
+	destRect.w = 40;
+	destRect.h = 40;
+
+	SDL_RenderCopy(mainRenderer, cursorLayer, nullptr, &destRect);
 }
 
-CCursorHandler::CCursorHandler() = default;
+CCursorHandler::CCursorHandler()
+	: help(nullptr),
+	cursorLayer(nullptr),
+	showing(false)
+{
+
+}
 
 CCursorHandler::~CCursorHandler()
 {
 	if(help)
 		SDL_FreeSurface(help);
+
+	if(cursorLayer)
+		SDL_DestroyTexture(cursorLayer);
 }

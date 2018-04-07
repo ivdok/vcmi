@@ -457,13 +457,14 @@ void CGuiHandler::renderFrame()
 		if(nullptr != curInt)
 			curInt->update();
 
-		if (settings["general"]["showfps"].Bool())
+		if(settings["general"]["showfps"].Bool())
 			drawFPSCounter();
 
-		// draw the mouse cursor and update the screen
-		CCS->curh->render();
+		SDL_UpdateTexture(screenTexture, nullptr, screen->pixels, screen->pitch);
 
 		SDL_RenderCopy(mainRenderer, screenTexture, nullptr, nullptr);
+
+		CCS->curh->render();
 
 		SDL_RenderPresent(mainRenderer);
 	}
