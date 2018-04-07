@@ -8,7 +8,7 @@
  *
  */
 #pragma once
-
+class CIntObject;
 class CAnimImage;
 struct SDL_Surface;
 struct SDL_Texture;
@@ -29,7 +29,7 @@ class CCursorHandler final
 {
 	SDL_Texture * cursorLayer;
 
-	SDL_Surface * help;
+	SDL_Surface * buffer;
 	CAnimImage * currentCursor;
 
 	std::unique_ptr<CAnimImage> dndObject; //if set, overrides currentCursor
@@ -37,6 +37,10 @@ class CCursorHandler final
 	std::array<std::unique_ptr<CAnimImage>, 4> cursors;
 
 	bool showing;
+
+	void clearBuffer();
+	void updateBuffer(CIntObject * payload);
+	void replaceBuffer(CIntObject * payload);
 
 public:
 	/// position of cursor

@@ -18,6 +18,26 @@
 
 #include "../CMT.h"
 
+void CCursorHandler::clearBuffer()
+{
+	Uint32 fillColor = SDL_MapRGBA(buffer->format, 0, 0, 0, 0);
+    CSDL_Ext::fillRect(buffer, nullptr, fillColor);
+}
+
+void CCursorHandler::updateBuffer(CIntObject * payload)
+{
+	payload->moveTo(Point(0,0));
+	payload->showAll(buffer);
+
+	SDL_UpdateTexture(cursorLayer, nullptr, buffer->pixels, buffer->pitch);
+}
+
+void CCursorHandler::replaceBuffer(CIntObject * payload)
+{
+	clearBuffer();
+	updateBuffer(payload);
+}
+
 void CCursorHandler::initCursor()
 {
 	cursorLayer = SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 40, 40);
@@ -37,9 +57,9 @@ void CCursorHandler::initCursor()
 
 	currentCursor = cursors.at(int(ECursor::DEFAULT)).get();
 
-	help = CSDL_Ext::newSurface(40,40);
-	//No blending. Ensure, that we are copying pixels during "screen restore draw"
-	SDL_SetSurfaceBlendMode(help,SDL_BLENDMODE_NONE);
+	buffer = CSDL_Ext::newSurface(40,40);
+
+	SDL_SetSurfaceBlendMode(buffer, SDL_BLENDMODE_NONE);
 	SDL_ShowCursor(SDL_DISABLE);
 
 	changeGraphic(ECursor::ADVENTURE, 0);
@@ -59,11 +79,17 @@ void CCursorHandler::changeGraphic(ECursor::ECursorTypes type, int index)
 		this->frame = index;
 		currentCursor->setFrame(index);
 	}
+
+	replaceBuffer(currentCursor);
 }
 
 void CCursorHandler::dragAndDropCursor(std::unique_ptr<CAnimImage> object)
 {
 	dndObject = std::move(object);
+	if(dndObject)
+		replaceBuffer(dndObject.get());
+	else
+		replaceBuffer(currentCursor);
 }
 
 void CCursorHandler::cursorMove(const int & x, const int & y)
@@ -197,25 +223,11 @@ void CCursorHandler::render()
 	int y = ypos;
 	shiftPos(x, y);
 
-	Uint32 fillColor = SDL_MapRGBA(help->format, 0, 0, 0, 0);
-
-    CSDL_Ext::fillRect(help, nullptr, fillColor);
-
 	if(dndObject)
 	{
 		x -= dndObject->pos.w/2;
 		y -= dndObject->pos.h/2;
-
-		dndObject->moveTo(Point(0, 0));
-		dndObject->showAll(help);
 	}
-	else
-	{
-		currentCursor->moveTo(Point(0,0));
-		currentCursor->showAll(help);
-	}
-
-	SDL_UpdateTexture(cursorLayer, nullptr, help->pixels, help->pitch);
 
 	SDL_Rect destRect;
 	destRect.x = x;
@@ -227,7 +239,7 @@ void CCursorHandler::render()
 }
 
 CCursorHandler::CCursorHandler()
-	: help(nullptr),
+	: buffer(nullptr),
 	cursorLayer(nullptr),
 	showing(false)
 {
@@ -236,8 +248,8 @@ CCursorHandler::CCursorHandler()
 
 CCursorHandler::~CCursorHandler()
 {
-	if(help)
-		SDL_FreeSurface(help);
+	if(buffer)
+		SDL_FreeSurface(buffer);
 
 	if(cursorLayer)
 		SDL_DestroyTexture(cursorLayer);
