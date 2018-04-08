@@ -164,11 +164,6 @@ void CIntObject::printAtLoc(const std::string & text, int x, int y, EFonts font,
 	graphics->fonts[font]->renderTextLeft(dst, text, kolor, Point(pos.x + x, pos.y + y));
 }
 
-void CIntObject::printAtRightLoc(const std::string & text, int x, int y, EFonts font, SDL_Color kolor, SDL_Surface * dst)
-{
-	graphics->fonts[font]->renderTextRight(dst, text, kolor, Point(pos.x + x, pos.y + y));
-}
-
 void CIntObject::printAtMiddleLoc(const std::string & text, int x, int y, EFonts font, SDL_Color kolor, SDL_Surface * dst)
 {
 	printAtMiddleLoc(text, Point(x,y), font, kolor, dst);
@@ -192,11 +187,6 @@ void CIntObject::blitAtLoc(SDL_Surface * src, const Point &p, SDL_Surface * dst)
 void CIntObject::printAtMiddleWBLoc( const std::string & text, int x, int y, EFonts font, int charpr, SDL_Color kolor, SDL_Surface * dst)
 {
 	graphics->fonts[font]->renderTextLinesCenter(dst, CMessage::breakText(text, charpr, font), kolor, Point(pos.x + x, pos.y + y));
-}
-
-void CIntObject::printToLoc( const std::string & text, int x, int y, EFonts font, SDL_Color kolor, SDL_Surface * dst )
-{
-	graphics->fonts[font]->renderTextRight(dst, text, kolor, Point(pos.x + x, pos.y + y));
 }
 
 void CIntObject::addUsedEvents(ui16 newActions)
@@ -300,11 +290,6 @@ void CIntObject::removeChild(CIntObject * child, bool adjustPosition)
 	child->parent_m = nullptr;
 	if(adjustPosition)
 		child->pos -= pos;
-}
-
-void CIntObject::drawBorderLoc(SDL_Surface * sur, const Rect &r, const int3 &color)
-{
-	CSDL_Ext::drawBorder(sur, r + pos, color);
 }
 
 void CIntObject::redraw()

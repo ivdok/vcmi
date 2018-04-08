@@ -1049,18 +1049,6 @@ static void cleanupRenderer()
 		SDL_DestroyTexture(screenTexture);
 		screenTexture = nullptr;
 	}
-
-	if(nullptr != mainRenderer)
-	{
-		SDL_DestroyRenderer(mainRenderer);
-		mainRenderer = nullptr;
-	}
-
-	if(nullptr != mainWindow)
-	{
-		SDL_DestroyWindow(mainWindow);
-		mainWindow = nullptr;
-	}
 }
 
 static bool recreateWindow(int w, int h, int bpp, bool fullscreen, int displayIndex)
@@ -1085,46 +1073,84 @@ static bool recreateWindow(int w, int h, int bpp, bool fullscreen, int displayIn
 	}
 
 	bool bufOnScreen = (screenBuf == screen);
+	bool realFullscreen = settings["video"]["realFullscreen"].Bool();
 
 	cleanupRenderer();
 
-	bool realFullscreen = settings["video"]["realFullscreen"].Bool();
-
-#ifdef VCMI_ANDROID
-	mainWindow = SDL_CreateWindow(NAME.c_str(), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), 0, 0, SDL_WINDOW_FULLSCREEN);
-#else
-
-	if(fullscreen)
+	if(nullptr == mainWindow)
 	{
-		if(realFullscreen)
-			mainWindow = SDL_CreateWindow(NAME.c_str(), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), w, h, SDL_WINDOW_FULLSCREEN);
-		else //in windowed full-screen mode use desktop resolution
-			mainWindow = SDL_CreateWindow(NAME.c_str(), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP);
-		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+
+	#ifdef VCMI_ANDROID
+		mainWindow = SDL_CreateWindow(NAME.c_str(), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), 0, 0, SDL_WINDOW_FULLSCREEN);
+	#else
+
+		if(fullscreen)
+		{
+			if(realFullscreen)
+				mainWindow = SDL_CreateWindow(NAME.c_str(), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), w, h, SDL_WINDOW_FULLSCREEN);
+			else //in windowed full-screen mode use desktop resolution
+				mainWindow = SDL_CreateWindow(NAME.c_str(), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex),SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), 0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+		}
+		else
+		{
+			mainWindow = SDL_CreateWindow(NAME.c_str(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex),SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), w, h, 0);
+		}
+	#endif
+
+		if(nullptr == mainWindow)
+		{
+			throw std::runtime_error("Unable to create window\n");
+		}
+
+		//create first available renderer if preferred not set. Use no flags, so HW accelerated will be preferred but SW renderer also will possible
+		mainRenderer = SDL_CreateRenderer(mainWindow,preferredDriverIndex,0);
+
+		if(nullptr == mainRenderer)
+		{
+			throw std::runtime_error("Unable to create renderer\n");
+		}
+
+
+		SDL_RendererInfo info;
+		SDL_GetRendererInfo(mainRenderer, &info);
+		logGlobal->info("Created renderer %s", info.name);
+
 	}
 	else
 	{
-		mainWindow = SDL_CreateWindow(NAME.c_str(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex),SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), w, h, 0);
-	}
+#ifndef VCMI_ANDROID
+
+		if(fullscreen)
+		{
+			if(realFullscreen)
+			{
+				SDL_SetWindowFullscreen(mainWindow, SDL_WINDOW_FULLSCREEN);
+
+				SDL_DisplayMode mode;
+				SDL_GetDesktopDisplayMode(displayIndex, &mode);
+				mode.w = w;
+				mode.h = h;
+
+				SDL_SetWindowDisplayMode(mainWindow, &mode);
+			}
+			else
+			{
+				SDL_SetWindowFullscreen(mainWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			}
+
+			SDL_SetWindowPosition(mainWindow, SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex), SDL_WINDOWPOS_UNDEFINED_DISPLAY(displayIndex));
+
+			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+		}
+		else
+		{
+			SDL_SetWindowFullscreen(mainWindow, 0);
+			SDL_SetWindowSize(mainWindow, w, h);
+			SDL_SetWindowPosition(mainWindow, SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex));
+		}
 #endif
-
-	if(nullptr == mainWindow)
-	{
-		throw std::runtime_error("Unable to create window\n");
 	}
-
-
-	//create first available renderer if preferred not set. Use no flags, so HW accelerated will be preferred but SW renderer also will possible
-	mainRenderer = SDL_CreateRenderer(mainWindow,preferredDriverIndex,0);
-
-	if(nullptr == mainRenderer)
-	{
-		throw std::runtime_error("Unable to create renderer\n");
-	}
-
-	SDL_RendererInfo info;
-	SDL_GetRendererInfo(mainRenderer, &info);
-	logGlobal->info("Created renderer %s", info.name);
 
 	if(!(fullscreen && realFullscreen))
 	{
@@ -1354,6 +1380,19 @@ void handleQuit(bool ask)
 		if(!settings["session"]["headless"].Bool())
 		{
 			cleanupRenderer();
+
+			if(nullptr != mainRenderer)
+			{
+				SDL_DestroyRenderer(mainRenderer);
+				mainRenderer = nullptr;
+			}
+
+			if(nullptr != mainWindow)
+			{
+				SDL_DestroyWindow(mainWindow);
+				mainWindow = nullptr;
+			}
+
 			SDL_Quit();
 		}
 
