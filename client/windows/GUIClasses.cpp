@@ -990,7 +990,7 @@ CShipyardWindow::CShipyardWindow(const std::vector<si32> & cost, int state, int 
 	std::string boatFilenames[3] = {"AB01_", "AB02_", "AB03_"};
 
 	Point waterCenter = Point(bgWater->pos.x+bgWater->pos.w/2, bgWater->pos.y+bgWater->pos.h/2);
-	bgShip = std::make_shared<CAnimImage>(boatFilenames[boatType], 0, 7, 120, 96, CShowableAnim::USE_RLE);
+	bgShip = std::make_shared<CAnimImage>(boatFilenames[boatType], 0, 7, 120, 96, 0);
 	bgShip->center(waterCenter);
 
 	// Create resource icons and costs.

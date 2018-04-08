@@ -41,7 +41,7 @@
 #include "../../lib/mapObjects/CGTownInstance.h"
 
 CBuildingRect::CBuildingRect(CCastleBuildings * Par, const CGTownInstance * Town, const CStructure * Str)
-	: CShowableAnim(0, 0, Str->defName, CShowableAnim::BASE | CShowableAnim::USE_RLE),
+	: CShowableAnim(0, 0, Str->defName, CShowableAnim::BASE),
 	parent(Par),
 	town(Town),
 	str(Str),
@@ -1750,7 +1750,7 @@ CBlacksmithDialog::CBlacksmithDialog(bool possible, CreatureID creMachineID, Art
 	animBG->needRefresh = true;
 
 	const CCreature * creature = CGI->creh->creatures[creMachineID];
-	anim = std::make_shared<CCreatureAnim>(64, 50, creature->animDefName, Rect());
+	anim = std::make_shared<CCreatureAnim>(64, 50, creature->animDefName);
 	anim->clipRect(113,125,200,150);
 
 	title = std::make_shared<CLabel>(165, 28, FONT_BIG, CENTER, Colors::YELLOW,

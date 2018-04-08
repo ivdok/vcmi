@@ -68,9 +68,6 @@ private:
 	//animation file name
 	std::string name;
 
-	//if true all frames will be stored in compressed (RLE) state
-	const bool compressed;
-
 	bool preloaded;
 
 	std::shared_ptr<CDefFile> defFile;
@@ -93,7 +90,7 @@ private:
 	std::shared_ptr<IImage> getFromExtraDef(std::string filename);
 
 public:
-	CAnimation(std::string Name, bool Compressed = false);
+	CAnimation(std::string Name);
 	CAnimation();
 	~CAnimation();
 
