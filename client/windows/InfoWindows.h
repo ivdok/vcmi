@@ -123,11 +123,11 @@ public:
 
 /// component selection window
 class CSelWindow : public CInfoWindow
-{ //warning - this window deletes its components by closing!
+{
 public:
 	void selectionChange(unsigned to);
 	void madeChoice(); //looks for selected component and calls callback
 	CSelWindow(const std::string & text, PlayerColor player, int charperline ,const std::vector<std::shared_ptr<CSelectableComponent>> & comps, const std::vector<std::pair<std::string,CFunctionList<void()> > > &Buttons, QueryID askID);
-	CSelWindow(){};
+
 	//notification - this class inherits important destructor from CInfoWindow
 };

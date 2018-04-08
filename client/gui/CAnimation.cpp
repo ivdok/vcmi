@@ -1364,9 +1364,9 @@ bool CAnimation::loadFrame(size_t frame, size_t group)
 			if(vstd::contains(frameList, group) && frameList.at(group) > frame) // frame is present
 			{
 				if(compressed)
-					images[group][frame] = std::make_shared<CompImage>(defFile, frame, group);
+					images[group][frame] = std::make_shared<CompImage>(defFile.get(), frame, group);
 				else
-					images[group][frame] = std::make_shared<SDLImage>(defFile, frame, group);
+					images[group][frame] = std::make_shared<SDLImage>(defFile.get(), frame, group);
 				return true;
 			}
 		}
@@ -1511,7 +1511,7 @@ CAnimation::CAnimation(std::string Name, bool Compressed):
 	name(Name),
 	compressed(Compressed),
 	preloaded(false),
-	defFile(nullptr)
+	defFile()
 {
 	size_t dotPos = name.find_last_of('.');
 	if ( dotPos!=-1 )
@@ -1521,7 +1521,7 @@ CAnimation::CAnimation(std::string Name, bool Compressed):
 	ResourceID resource(std::string("SPRITES/") + name, EResType::ANIMATION);
 
 	if(CResourceHandler::get()->existsResource(resource))
-		defFile = new CDefFile(name);
+		defFile = std::make_shared<CDefFile>(name);
 
 	init();
 
@@ -1533,16 +1533,12 @@ CAnimation::CAnimation():
 	name(""),
 	compressed(false),
 	preloaded(false),
-	defFile(nullptr)
+	defFile()
 {
 	init();
 }
 
-CAnimation::~CAnimation()
-{
-	if(defFile)
-		delete defFile;
-}
+CAnimation::~CAnimation() = default;
 
 void CAnimation::duplicateImage(const size_t sourceGroup, const size_t sourceFrame, const size_t targetGroup)
 {

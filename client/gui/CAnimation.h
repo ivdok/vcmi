@@ -73,7 +73,7 @@ private:
 
 	bool preloaded;
 
-	CDefFile * defFile;
+	std::shared_ptr<CDefFile> defFile;
 
 	//loader, will be called by load(), require opened def file for loading from it. Returns true if image is loaded
 	bool loadFrame(size_t frame, size_t group);
