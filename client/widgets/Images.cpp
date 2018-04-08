@@ -173,7 +173,7 @@ void CPicture::createSimpleRect(const Rect &r, bool screenFormat, ui32 color)
 	if(screenFormat)
 		bg = CSDL_Ext::newSurface(r.w, r.h);
 	else
-		bg = SDL_CreateRGBSurface(SDL_SWSURFACE, r.w, r.h, 8, 0, 0, 0, 0);
+		bg = SDL_CreateRGBSurface(0, r.w, r.h, 8, 0, 0, 0, 0);
 
 	SDL_FillRect(bg, nullptr, color);
 	freeSurf = true;

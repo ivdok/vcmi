@@ -492,7 +492,7 @@ SDLImageLoader::SDLImageLoader(SDLImage * Img):
 void SDLImageLoader::init(Point SpriteSize, Point Margins, Point FullSize, SDL_Color *pal)
 {
 	//Init image
-	image->surf = SDL_CreateRGBSurface(SDL_SWSURFACE, SpriteSize.x, SpriteSize.y, 8, 0, 0, 0, 0);
+	image->surf = SDL_CreateRGBSurface(0, SpriteSize.x, SpriteSize.y, 8, 0, 0, 0, 0);
 	image->margins  = Margins;
 	image->fullSize = FullSize;
 
