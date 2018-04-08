@@ -100,7 +100,7 @@ CBattleInterface::CBattleInterface(const CCreatureSet *army1, const CCreatureSet
 	  currentlyHoveredHex(-1), attackingHex(-1), stackCanCastSpell(false), creatureCasting(false), spellDestSelectMode(false), spellToCast(nullptr), sp(nullptr),
 	  creatureSpellToCast(-1),
 	  siegeH(nullptr), attackerInt(att), defenderInt(defen), curInt(att), animIDhelper(0),
-	  myTurn(false), resWindow(nullptr), moveStarted(false), moveSoundHander(-1), bresult(nullptr)
+	  myTurn(false), moveStarted(false), moveSoundHander(-1), bresult(nullptr)
 {
 	OBJ_CONSTRUCTION;
 
@@ -155,7 +155,7 @@ CBattleInterface::CBattleInterface(const CCreatureSet *army1, const CCreatureSet
 		siegeH = new SiegeHelper(town, this);
 	}
 
-	curInt->battleInt = this;
+	CPlayerInterface::battleInt = this;
 
 	//initializing armies
 	this->army1 = army1;
@@ -412,7 +412,7 @@ CBattleInterface::CBattleInterface(const CCreatureSet *army1, const CCreatureSet
 
 CBattleInterface::~CBattleInterface()
 {
-	curInt->battleInt = nullptr;
+	CPlayerInterface::battleInt = nullptr;
 	givenCommand.cond.notify_all(); //that two lines should make any activeStack waiting thread to finish
 
 	if (active) //dirty fix for #485
@@ -786,8 +786,7 @@ void CBattleInterface::bOptionsf()
 
 	Rect tempRect = genRect(431, 481, 160, 84);
 	tempRect += pos.topLeft();
-	auto  optionsWin = new CBattleOptionsWindow(tempRect, this);
-	GH.pushInt(optionsWin);
+	GH.pushIntT<CBattleOptionsWindow>(tempRect, this);
 }
 
 void CBattleInterface::bSurrenderf()
@@ -900,7 +899,7 @@ void CBattleInterface::bSpellf()
 
 	if(spellCastProblem == ESpellCastProblem::OK)
 	{
-		GH.pushInt(new CSpellWindow(myHero, curInt.get()));
+		GH.pushIntT<CSpellWindow>(myHero, curInt.get());
 	}
 	else if (spellCastProblem == ESpellCastProblem::MAGIC_IS_BLOCKED)
 	{
@@ -1276,13 +1275,13 @@ void CBattleInterface::displayBattleFinished()
 	CCS->curh->changeGraphic(ECursor::ADVENTURE,0);
 	if(settings["session"]["spectate"].Bool() && settings["session"]["spectate-skip-battle-result"].Bool())
 	{
-		GH.popIntTotally(this);
+		close();
 		return;
 	}
 
-	resWindow = new CBattleResultWindow(*bresult, *this->curInt);
-	GH.pushInt(resWindow);
+	GH.pushInt(std::make_shared<CBattleResultWindow>(*bresult, *(this->curInt)));
 	curInt->waitWhileDialog(); // Avoid freeze when AI end turn after battle. Check bug #1897
+	CPlayerInterface::battleInt = nullptr;
 }
 
 void CBattleInterface::spellCast(const BattleSpellCast * sc)
@@ -2419,7 +2418,7 @@ void CBattleInterface::handleHex(BattleHex myNumber, int eventType)
 			{
 				cursorFrame = ECursor::COMBAT_QUERY;
 				consoleMsg = (boost::format(CGI->generaltexth->allTexts[297]) % shere->getName()).str();
-				realizeAction = [=](){ GH.pushInt(new CStackWindow(shere, false)); };
+				realizeAction = [=](){ GH.pushIntT<CStackWindow>(shere, false); };
 				break;
 			}
 		}

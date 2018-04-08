@@ -504,7 +504,7 @@ int main(int argc, char * argv[])
 	}
 	else
 	{
-		GH.curInt = CMainMenu::create();
+		GH.curInt = CMainMenu::create().get();
 	}
 
 	if(!settings["session"]["headless"].Bool())
@@ -790,9 +790,9 @@ void processCommand(const std::string &message)
 	}
 	else if(cn == "gui")
 	{
-		for(const IShowActivatable *child : GH.listInt)
+		for(auto child : GH.listInt)
 		{
-			if(const CIntObject *obj = dynamic_cast<const CIntObject *>(child))
+			if(const CIntObject *obj = dynamic_cast<const CIntObject *>(child.get()))
 				printInfoAboutIntObject(obj, 0);
 			else
 				std::cout << typeid(*child).name() << std::endl;
@@ -1301,7 +1301,7 @@ static void handleEvent(SDL_Event & ev)
 				};
 				if(epilogue.hasPrologEpilog)
 				{
-					GH.pushInt(new CPrologEpilogVideo(epilogue, finisher));
+					GH.pushIntT<CPrologEpilogVideo>(epilogue, finisher);
 				}
 				else
 				{

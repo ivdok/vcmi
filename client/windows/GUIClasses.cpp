@@ -96,7 +96,7 @@ void CRecruitmentWindow::CCreatureCard::clickLeft(tribool down, bool previousSta
 void CRecruitmentWindow::CCreatureCard::clickRight(tribool down, bool previousState)
 {
 	if(down)
-		GH.pushInt(new CStackWindow(creature, true));
+		GH.pushIntT<CStackWindow>(creature, true);
 }
 
 void CRecruitmentWindow::CCreatureCard::showAll(SDL_Surface * to)
@@ -569,8 +569,7 @@ void CSystemOptionsWindow::selectGameRes()
 		items.push_back(resX + 'x' + resY);
 	}
 
-	GH.pushInt(new CObjectListWindow(items, nullptr, texts["label"].String(), texts["help"].String(),
-			   std::bind(&CSystemOptionsWindow::setGameRes, this, _1)));
+	GH.pushIntT<CObjectListWindow>(items, nullptr, texts["label"].String(), texts["help"].String(), std::bind(&CSystemOptionsWindow::setGameRes, this, _1));
 }
 
 void CSystemOptionsWindow::setGameRes(int index)
@@ -599,7 +598,7 @@ void CSystemOptionsWindow::bquitf()
 
 void CSystemOptionsWindow::breturnf()
 {
-	GH.popIntTotally(this);
+	close();
 }
 
 void CSystemOptionsWindow::bmainmenuf()
@@ -609,14 +608,14 @@ void CSystemOptionsWindow::bmainmenuf()
 
 void CSystemOptionsWindow::bloadf()
 {
-	GH.popIntTotally(this);
+	close();
 	LOCPLINT->proposeLoadingGame();
 }
 
 void CSystemOptionsWindow::bsavef()
 {
-	GH.popIntTotally(this);
-	GH.pushInt(new CSavingScreen());
+	close();
+	GH.pushIntT<CSavingScreen>();
 }
 
 void CSystemOptionsWindow::brestartf()
@@ -626,7 +625,7 @@ void CSystemOptionsWindow::brestartf()
 
 void CSystemOptionsWindow::closeAndPushEvent(int eventType, int code)
 {
-	GH.popIntTotally(this);
+	close();
 	GH.pushSDLEvent(eventType, code);
 }
 
@@ -705,7 +704,7 @@ void CTavernWindow::recruitb()
 
 void CTavernWindow::thievesguildb()
 {
-	GH.pushInt( new CThievesGuildWindow(tavernObj) );
+	GH.pushIntT<CThievesGuildWindow>(tavernObj);
 }
 
 CTavernWindow::~CTavernWindow()
@@ -746,7 +745,7 @@ void CTavernWindow::HeroPortrait::clickRight(tribool down, bool previousState)
 {
 	if(h && down)
 	{
-		GH.pushInt(new CRClickPopupInt(new CHeroWindow(h), true));
+		GH.pushIntT<CRClickPopupInt>(new CHeroWindow(h), true);
 	}
 }
 
@@ -1215,10 +1214,7 @@ void CUniversityWindow::CItem::clickLeft(tribool down, bool previousState)
 	if(previousState && (!down))
 	{
 		if(state() == 2)
-		{
-			auto win = new CUnivConfirmWindow(parent, ID, LOCPLINT->cb->getResourceAmount(Res::GOLD) >= 2000);
-			GH.pushInt(win);
-		}
+			GH.pushIntT<CUnivConfirmWindow>(parent, ID, LOCPLINT->cb->getResourceAmount(Res::GOLD) >= 2000);
 	}
 }
 
@@ -1813,14 +1809,14 @@ void CObjectListWindow::elementSelected()
 {
 	std::function<void(int)> toCall = onSelect;//save
 	int where = items[selected].first;      //required variables
-	GH.popIntTotally(this);//then destroy window
+	close();//then destroy window
 	toCall(where);//and send selected object
 }
 
 void CObjectListWindow::exitPressed()
 {
 	std::function<void()> toCall = onExit;//save
-	GH.popIntTotally(this);//then destroy window
+	close();//then destroy window
 	if(toCall)
 		toCall();
 }

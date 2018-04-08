@@ -11,8 +11,7 @@
 
 #include "../gui/CIntObject.h"
 
-/// Basic class for windows
-class CWindowObject : public CIntObject
+class CWindowObject : public WindowBase
 {
 	std::shared_ptr<CPicture> createBg(std::string imageName, bool playerColored);
 	int getUsedEvents(int options);
@@ -25,8 +24,6 @@ class CWindowObject : public CIntObject
 protected:
 	std::shared_ptr<CPicture> background;
 
-	//Simple function with call to GH.popInt
-	void close();
 	//Used only if RCLICK_POPUP was set
 	void clickRight(tribool down, bool previousState) override;
 	//To display border

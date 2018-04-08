@@ -213,7 +213,7 @@ void CIntObject::disable()
 
 void CIntObject::enable()
 {
-	if(!active_m && parent_m->active)
+	if(!active_m && (!parent_m || parent_m->active))
 		activate();
 
 	recActions = 255;
@@ -359,4 +359,17 @@ void CKeyShortcut::keyPressed(const SDL_KeyboardEvent & key)
 		clickLeft(key.state == SDL_PRESSED, prev);
 
 	}
+}
+
+WindowBase::WindowBase(int used_, Point pos_)
+	: CIntObject(used_, pos_)
+{
+
+}
+
+void WindowBase::close()
+{
+	if(GH.topInt().get() != this)
+		logGlobal->error("Only top interface must be closed");
+	GH.popInts(1);
 }

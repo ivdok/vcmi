@@ -96,10 +96,11 @@ void CGuiHandler::handleElementDeActivate(CIntObject * elem, ui16 activityFlag)
 	elem->active_m &= ~activityFlag;
 }
 
-void CGuiHandler::popInt(IShowActivatable *top)
+void CGuiHandler::popInt(std::shared_ptr<IShowActivatable> top)
 {
 	assert(listInt.front() == top);
 	top->deactivate();
+	disposed.push_back(top);
 	listInt.pop_front();
 	objsToBlit -= top;
 	if(!listInt.empty())
@@ -109,18 +110,10 @@ void CGuiHandler::popInt(IShowActivatable *top)
 	pushSDLEvent(SDL_USEREVENT, EUserEvent::INTERFACE_CHANGED);
 }
 
-void CGuiHandler::popIntTotally(IShowActivatable *top)
-{
-	assert(listInt.front() == top);
-	popInt(top);
-	delete top;
-	fakeMouseMove();
-}
-
-void CGuiHandler::pushInt(IShowActivatable *newInt)
+void CGuiHandler::pushInt(std::shared_ptr<IShowActivatable> newInt)
 {
 	assert(newInt);
-	assert(boost::range::find(listInt, newInt) == listInt.end()); // do not add same object twice
+	assert(!vstd::contains(listInt, newInt)); // do not add same object twice
 
 	//a new interface will be present, we'll need to use buffer surface (unless it's advmapint that will alter screenBuf on activate anyway)
 	screenBuf = screen2;
@@ -144,7 +137,7 @@ void CGuiHandler::popInts(int howMany)
 	for(int i=0; i < howMany; i++)
 	{
 		objsToBlit -= listInt.front();
-		delete listInt.front();
+		disposed.push_back(listInt.front());
 		listInt.pop_front();
 	}
 
@@ -158,10 +151,10 @@ void CGuiHandler::popInts(int howMany)
 	pushSDLEvent(SDL_USEREVENT, EUserEvent::INTERFACE_CHANGED);
 }
 
-IShowActivatable * CGuiHandler::topInt()
+std::shared_ptr<IShowActivatable> CGuiHandler::topInt()
 {
 	if(listInt.empty())
-		return nullptr;
+		return std::shared_ptr<IShowActivatable>();
 	else
 		return listInt.front();
 }
@@ -234,11 +227,11 @@ void CGuiHandler::handleCurrentEvent()
 
 			case SDLK_F9:
 				//not working yet since CClient::run remain locked after CBattleInterface removal
-				if(LOCPLINT->battleInt)
-				{
-					GH.popIntTotally(GH.topInt());
-					vstd::clear_pointer(LOCPLINT->battleInt);
-				}
+//				if(LOCPLINT->battleInt)
+//				{
+//					GH.popInts(1);
+//					vstd::clear_pointer(LOCPLINT->battleInt);
+//				}
 				break;
 
 			default:
@@ -467,6 +460,8 @@ void CGuiHandler::renderFrame()
 		CCS->curh->render();
 
 		SDL_RenderPresent(mainRenderer);
+
+		disposed.clear();
 	}
 
 	mainFPSmng->framerateDelay(); // holds a constant FPS

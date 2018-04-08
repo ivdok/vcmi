@@ -34,7 +34,7 @@
 #include "../../lib/CGeneralTextHandler.h" //for Unicode related stuff
 
 CWindowObject::CWindowObject(int options_, std::string imageName, Point centerAt):
-	CIntObject(getUsedEvents(options_), Point()),
+	WindowBase(getUsedEvents(options_), Point()),
 	shadow(nullptr),
 	options(options_),
 	background(createBg(imageName, options & PLAYER_COLORED))
@@ -56,7 +56,7 @@ CWindowObject::CWindowObject(int options_, std::string imageName, Point centerAt
 }
 
 CWindowObject::CWindowObject(int options_, std::string imageName):
-	CIntObject(getUsedEvents(options_), Point()),
+	WindowBase(getUsedEvents(options_), Point()),
 	options(options_),
 	background(createBg(imageName, options_ & PLAYER_COLORED))
 {
@@ -237,11 +237,6 @@ void CWindowObject::showAll(SDL_Surface *to)
 	CIntObject::showAll(to);
 	if ((options & BORDERED) && (pos.h != to->h || pos.w != to->w))
 		CMessage::drawBorder(color, to, pos.w+28, pos.h+29, pos.x-14, pos.y-15);
-}
-
-void CWindowObject::close()
-{
-	GH.popIntTotally(this);
 }
 
 void CWindowObject::clickRight(tribool down, bool previousState)

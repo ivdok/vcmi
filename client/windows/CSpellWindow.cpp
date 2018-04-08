@@ -255,7 +255,7 @@ void CSpellWindow::fexitb()
 	(myInt->battleInt ? myInt->spellbookSettings.spellbookLastTabBattle : myInt->spellbookSettings.spellbookLastTabAdvmap) = selectedTab;
 	(myInt->battleInt ? myInt->spellbookSettings.spellbookLastPageBattle : myInt->spellbookSettings.spellbokLastPageAdvmap) = currentPage;
 
-	GH.popIntTotally(this);
+	close();
 }
 
 void CSpellWindow::fadvSpellsb()
@@ -568,7 +568,7 @@ void CSpellWindow::SpellArea::clickLeft(tribool down, bool previousState)
 		else //adventure spell
 		{
 			const CGHeroInstance * h = owner->myHero;
-			GH.popInt(owner);
+			GH.popInts(1);
 
 			auto guard = vstd::makeScopeGuard([this]()
 			{

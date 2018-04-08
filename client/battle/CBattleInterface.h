@@ -106,7 +106,7 @@ struct CatapultProjectileInfo
 
 /// Big class which handles the overall battle interface actions and it is also responsible for
 /// drawing everything correctly.
-class CBattleInterface : public CIntObject
+class CBattleInterface : public WindowBase
 {
 	enum PossibleActions // actions performed at l-click
 	{
@@ -288,7 +288,6 @@ public:
 	SDL_Surface *cellBorder, *cellShade;
 
 	bool myTurn; //if true, interface is active (commands can be ordered)
-	CBattleResultWindow *resWindow; //window of end of battle
 
 	bool moveStarted; //if true, the creature that is already moving is going to make its first step
 	int moveSoundHander; // sound handler used when moving a unit

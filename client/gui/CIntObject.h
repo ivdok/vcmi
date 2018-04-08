@@ -208,3 +208,11 @@ public:
 	CKeyShortcut(std::set<int> Keys);
 	virtual void keyPressed(const SDL_KeyboardEvent & key) override; //call-in
 };
+
+class WindowBase : public CIntObject
+{
+public:
+	WindowBase(int used_ = 0, Point pos_ = Point());
+protected:
+    void close();
+};
