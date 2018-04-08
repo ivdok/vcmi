@@ -215,6 +215,7 @@ void CWindowObject::setShadow(bool on)
 		{
 			OBJECT_CONSTRUCTION_CUSTOM_CAPTURING(255-DISPOSE);
 			shadow = std::make_shared<CIntObject>();
+			shadow->defActions = 255;
 		}
 
 		{
