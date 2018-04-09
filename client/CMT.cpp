@@ -1337,6 +1337,13 @@ static void handleEvent(SDL_Event & ev)
 		}
 		return;
 	}
+
+	//preprocessing
+	if(ev.type == SDL_MOUSEMOTION)
+	{
+		CCS->curh->cursorMove(ev.motion.x, ev.motion.y);
+	}
+
 	{
 		boost::unique_lock<boost::mutex> lock(eventsM);
 		events.push(ev);

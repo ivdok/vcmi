@@ -264,7 +264,6 @@ void CGuiHandler::handleCurrentEvent()
 	}
 	else if(current->type == SDL_MOUSEMOTION)
 	{
-		CCS->curh->cursorMove(current->motion.x, current->motion.y);
 		handleMouseMotion();
 	}
 	else if(current->type == SDL_MOUSEBUTTONDOWN)
