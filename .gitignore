@@ -52,3 +52,12 @@ VCMI_VS11.opensdf
 /VCMI_VS11.VC.opendb
 /AI/FuzzyLite.lib
 /deps
+
+# PSVita specific
+vitasdk-nightly.*
+*.self
+*.elf
+*.velf
+*.bin
+*.vpk
+*.sfo
